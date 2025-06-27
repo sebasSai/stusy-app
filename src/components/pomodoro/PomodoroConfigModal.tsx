@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineXMark, HiOutlineCheckCircle, HiOutlineClock, HiOutlineArrowPath } from "react-icons/hi2";
 import { BsLayers } from "react-icons/bs";
-import { THEMES } from "../context/themePalettes";
-import type { ThemeKey } from "../context/themePalettes";
-import { useTheme } from "../context/ThemeContext";
+import { THEMES, type ThemeKey } from "../../context/themePalettes";
+import { useTheme } from "../../context/ThemeContext";
 
 interface PomodoroConfigModalProps {
   open: boolean;
@@ -31,7 +30,7 @@ const PomodoroConfigModal: React.FC<PomodoroConfigModalProps> = ({
   const [breakMinutes, setBreakMinutes] = useState(initialBreakMinutes);
   const [workSessions, setWorkSessions] = useState(initialWorkSessions);
 
-  const { currentThemeKey, setThemeByKey } = useTheme();
+  const { currentThemeKey, setThemeByKey, modalBg } = useTheme();
 
   useEffect(() => {
     setWorkMinutes(initialWorkMinutes);
@@ -71,7 +70,7 @@ const PomodoroConfigModal: React.FC<PomodoroConfigModalProps> = ({
             exit={{ scale: 0.97, y: 60, opacity: 0.7 }}
             transition={{ duration: 0.36, ease: [0.22, 0.8, 0.33, 1] }}
             style={{
-              background: "linear-gradient(120deg, #f6f8feCC 60%, #eaf6fdEE 100%)",
+              background: modalBg, // <-- Aquí el fondo dinámico del tema
               border: "1.5px solid #c5e6fa",
               boxShadow: "0 8px 44px 0 #14375922, 0 2px 24px #51a8e014",
               backdropFilter: "blur(18px)",

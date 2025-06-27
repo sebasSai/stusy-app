@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react"; // Hamburguesa y cerrar (puedes usar cualquier icono que tengas)
+import clsx from "clsx";
 
 const NAV_LINKS = [
   { label: "Pomodoro", path: "/" },
@@ -11,26 +13,35 @@ const NAV_LINKS = [
 const Navbar: React.FC = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
-  const { theme, headerGradient } = useTheme(); 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, headerGradient } = useTheme();
+
+  // Contraste para logo según tema
+  const logoTextColor = theme.deepNavy === "#FFFFFF" ? theme.primary : theme.deepNavy;
+  const logoBgColor = theme.cardBg;
+
+  // Contraste para links en minimalista
+  const linkColor = theme.input;
+  const mobileBg = headerGradient || theme.cardBg;
 
   return (
     <header
-      className="w-full px-6 py-3 flex items-center justify-between relative"
+      className="w-full px-6 py-3 flex items-center justify-between relative z-30"
       style={{
-        background: headerGradient || theme.cardBg, 
+        background: headerGradient || theme.cardBg,
         minHeight: 70,
         boxShadow: `0 6px 24px 0 ${theme.glow}40`,
-        zIndex: 20,
         position: "relative",
         transition: "background 0.8s cubic-bezier(.33,1.02,.58,1)",
       }}
     >
+      {/* Logo */}
       <div className="flex items-center gap-3 select-none relative z-10">
         <span
           className="px-3 py-1 rounded-full font-bold tracking-tight shadow"
           style={{
-            background: theme.cardBg,
-            color: theme.primary,
+            background: logoBgColor,
+            color: logoTextColor,
             fontSize: 26,
             letterSpacing: 1,
             border: `2.4px solid ${theme.primary}`,
@@ -42,6 +53,8 @@ const Navbar: React.FC = () => {
           Pomoflow
         </span>
       </div>
+
+      {/* Menú Desktop */}
       <nav className="hidden md:flex items-center gap-5 z-10">
         {NAV_LINKS.map((link) => (
           <a
@@ -49,7 +62,7 @@ const Navbar: React.FC = () => {
             href={link.path}
             className="text-base font-semibold px-3 py-1 rounded relative group transition-colors"
             style={{
-              color: theme.input,
+              color: linkColor,
               letterSpacing: 0.5,
               transition: "color 0.8s",
             }}
@@ -65,6 +78,7 @@ const Navbar: React.FC = () => {
             />
           </a>
         ))}
+        {/* Notificaciones */}
         <div className="relative">
           <button
             className="mx-2"
@@ -106,9 +120,10 @@ const Navbar: React.FC = () => {
               />
             </span>
           </button>
-          <AnimatePresence>{notifOpen && /* panel de notificaciones */ null}</AnimatePresence>
+          <AnimatePresence>{notifOpen && null}</AnimatePresence>
         </div>
 
+        {/* Usuario */}
         <div className="relative">
           <button
             onClick={() => {
@@ -138,9 +153,84 @@ const Navbar: React.FC = () => {
               A
             </span>
           </button>
-          <AnimatePresence>{userOpen && /*panel de usuario */ null}</AnimatePresence>
+          <AnimatePresence>{userOpen && null}</AnimatePresence>
         </div>
       </nav>
+
+      {/* Menú móvil (Hamburguesa) */}
+      <div className="flex md:hidden z-20">
+        <button
+          className="rounded-md p-2"
+          aria-label="Abrir menú"
+          style={{
+            background: theme.input,
+            border: "1.6px solid " + theme.primary,
+            color: theme.primary,
+            boxShadow: `0 1px 6px 0 ${theme.glow}11`,
+            transition: "background 0.5s, border 0.5s",
+          }}
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <Menu size={26} />
+        </button>
+        {/* Menú desplegable */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              className="fixed inset-0 flex flex-col bg-black/40 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <motion.div
+                className={clsx(
+                  "ml-auto w-3/4 max-w-xs h-full flex flex-col py-7 px-7 shadow-2xl",
+                  "rounded-l-3xl",
+                )}
+                style={{
+                  background: mobileBg,
+                  transition: "background 0.6s",
+                  boxShadow: `-6px 0 44px 0 ${theme.glow}11`,
+                }}
+                initial={{ x: 320 }}
+                animate={{ x: 0 }}
+                exit={{ x: 320 }}
+                transition={{ type: "spring", stiffness: 250, damping: 26 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  className="mb-8 ml-auto"
+                  aria-label="Cerrar menú"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    background: theme.input,
+                    borderRadius: "50%",
+                    border: "1.6px solid " + theme.primary,
+                    color: theme.primary,
+                  }}
+                >
+                  <X size={24} />
+                </button>
+                {NAV_LINKS.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.path}
+                    className="block text-lg font-bold py-3 mb-1 rounded transition-colors"
+                    style={{
+                      color: theme.input,
+                      background: "transparent",
+                    }}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </header>
   );
 };
